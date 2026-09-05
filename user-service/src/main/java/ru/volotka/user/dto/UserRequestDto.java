@@ -10,11 +10,13 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
+@ToString
 public class UserRequestDto {
     @NotBlank(message = "Имя не может быть пустым")
     @Size(min = 2, message = "Имя должно содержать минимум 2 символа")
