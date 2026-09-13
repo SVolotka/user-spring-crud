@@ -4,11 +4,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.volotka.common.dto.UserEventDto;
+import ru.volotka.common.enums.OperationType;
 import ru.volotka.user.dto.UserRequestDto;
 import ru.volotka.user.dto.UserResponseDto;
 import ru.volotka.user.entity.User;
 import ru.volotka.user.exception.ConflictException;
 import ru.volotka.user.exception.NotFoundException;
+import ru.volotka.user.kafka.KafkaProducerService;
 import ru.volotka.user.mapper.UserMapper;
 import ru.volotka.user.repository.UserRepository;
 
@@ -23,6 +26,7 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final KafkaProducerService kafkaProducerService;
 
     @Override
     @Transactional
@@ -35,6 +39,12 @@ public class UserServiceImpl implements UserService {
         User createdUser = userMapper.toEntity(userDto);
         createdUser = userRepository.save(createdUser);
         log.info("Создан пользователь с id: {}", createdUser.getId());
+
+        UserEventDto event = UserEventDto.builder()
+                .email(createdUser.getEmail())
+                .operationType(OperationType.CREATE)
+                .build();
+        kafkaProducerService.sendUserEvent(event);
         return userMapper.toResponseDto(createdUser);
     }
 
@@ -75,6 +85,12 @@ public class UserServiceImpl implements UserService {
 
         userRepository.delete(deletedUser);
         log.info("Удален пользователь с id: {}", id);
+
+        UserEventDto event = UserEventDto.builder()
+                .email(deletedUser.getEmail())
+                .operationType(OperationType.DELETE)
+                .build();
+        kafkaProducerService.sendUserEvent(event);
         return userMapper.toResponseDto(deletedUser);
     }
 
