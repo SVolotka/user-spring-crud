@@ -6,7 +6,6 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import ru.volotka.common.dto.UserEventDto;
-import ru.volotka.common.enums.OperationType;
 
 @Service
 @RequiredArgsConstructor
@@ -21,15 +20,7 @@ public class EmailService {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(event.getEmail());
         message.setSubject("Уведомление об аккаунте");
-
-        if (event.getOperationType() == OperationType.CREATE) {
-            message.setText("Здравствуйте! Ваш аккаунт на сайте был успешно создан.");
-        } else if (event.getOperationType() == OperationType.DELETE) {
-            message.setText("Здравствуйте! Ваш аккаунт был удалён.");
-        } else {
-            log.warn("Неизвестный тип операции: {}", event.getOperationType());
-            return;
-        }
+        message.setText(event.getOperationType().getNotificationText());
 
         try {
             mailSender.send(message);
