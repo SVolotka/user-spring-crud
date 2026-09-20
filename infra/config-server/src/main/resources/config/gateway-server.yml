@@ -1,0 +1,39 @@
+server:
+  port: 8090
+
+spring:
+  cloud:
+    gateway:
+      server:
+        webflux:
+          discovery:
+            locator:
+              enabled: false
+          routes:
+            - id: user-service-route
+              uri: lb://user-service
+              predicates:
+                - Path=/users/**
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: userServiceCircuitBreaker
+                    fallbackUri: forward:/fallback/user-service
+                - AddRequestHeader=X-Forwarded-Host, localhost:8090
+                - AddRequestHeader=X-Forwarded-Proto, http
+                - AddRequestHeader=X-Forwarded-Port, 8090
+            - id: notification-service-route
+              uri: lb://notification-service
+              predicates:
+                - Path=/notifications/**
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      userServiceCircuitBreaker:
+        sliding-window-size: 10
+        minimum-number-of-calls: 3
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s
+        permitted-number-of-calls-in-half-open-state: 3
+        automatic-transition-from-open-to-half-open-enabled: true
