@@ -24,7 +24,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
         "spring.mail.password=",
         "spring.mail.properties.mail.smtp.auth=false",
         "spring.mail.properties.mail.smtp.starttls.enable=false",
-        "spring.kafka.listener.auto-startup=false"
+        "spring.kafka.listener.auto-startup=false",
+        "spring.kafka.bootstrap-servers=localhost:9092"
 })
 public class EmailServiceIntegrationTest {
 
