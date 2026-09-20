@@ -87,9 +87,10 @@ class UserControllerTest {
 
         mockMvc.perform(get("/users"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(2)))
-                .andExpect(jsonPath("$[0].id").value(1L))
-                .andExpect(jsonPath("$[1].id").value(2L));
+                .andExpect(jsonPath("$._embedded.userResponseDtoList", hasSize(2)))
+                .andExpect(jsonPath("$._embedded.userResponseDtoList[0].id").value(1L))
+                .andExpect(jsonPath("$._embedded.userResponseDtoList[1].id").value(2L))
+                .andExpect(jsonPath("$._links.self.href").exists());
 
         verify(userService, times(1)).findAll();
     }
